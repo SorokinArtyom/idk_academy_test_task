@@ -12,8 +12,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${POSTGRES_DB}" ]
-      interval: 30s
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d fast_api" ]
+      interval: 15s
       timeout: 10s
       retries: 5
     restart: unless-stopped
@@ -37,6 +37,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: fast_api
+    restart: on-failure
 
 volumes:
   pgdata:
