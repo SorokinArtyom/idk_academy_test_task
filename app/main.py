@@ -1,36 +1,8 @@
 from fastapi import FastAPI, HTTPException, Path, Query, Body
 from typing import Optional, Annotated
-from pydantic import BaseModel, Field
 
-class User(BaseModel):
+from app.schemas import Post, PostCreate, User, UserCreate
 
-    id: int 
-    name: str
-    age: int
-
-
-class Post(BaseModel):
-
-    id: int
-    title: str
-    body: str
-    author: User
-
-
-class PostCreate(BaseModel):
-    
-    title: str
-    body: str
-    author_id: int
-
-
-class UserCreate(BaseModel):
-    name: Annotated[
-        str, Field(..., title="Имя пользователя", min_length=2, max_length=20)
-    ]
-    age: Annotated[
-        int, Field(..., title="Возраст пользователя", ge=1, le=120)
-    ]
 
 users = [
     {"id": 1, "name": "John", "age": 34},
@@ -43,9 +15,6 @@ posts = [
     {'id': 2, 'title': 'News page 2', 'body': 'Text from page 2', 'author': users[0]},
     {'id': 3, 'title': 'News page 3', 'body': 'Text from page 3', 'author': users[2]}
 ]
-
-
-
 
 app = FastAPI()
 
