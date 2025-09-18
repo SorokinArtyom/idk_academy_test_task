@@ -10,7 +10,9 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data/pgdata
+      - pgdata:/var/lib/postgresql/data
+      - ./dump_file.dump:/docker-entrypoint-initdb.d/dump_file.dump:ro
+      - ./restore.sh:/docker-entrypoint-initdb.d/restore.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d fast_api" ]
       interval: 15s
@@ -26,8 +28,6 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app
-      - pgdata:/var/lib/postgresql/data
-      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql:ro
     ports:
       - "8000:8000"
     depends_on:
