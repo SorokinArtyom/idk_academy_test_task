@@ -30,6 +30,16 @@ class match(Base):
     
     def __repr__(self):
         return str(self)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'first_team_id': self.first_team_id,
+            'second_team_id': self.second_team_id,
+            'time_match': self.time_match,
+            'result_first': self.result_first,
+            'result_second': self.result_second
+        }
 
 
 # Создаем модель отношения "команда"
