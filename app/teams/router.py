@@ -1,9 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.teams.dao import TeamDAO
+from app.teams.rb import RBTeam
 from app.teams.schemas import Schema_teams_add, Schema_teams_Update
 
 router = APIRouter(prefix='/teams', tags=['Работа с командами'])
 
+
+@router.get("/", summary="Получить все матчи", response_model=list[Schema_teams_add])
+async def get_all_matches(request_body: RBTeam = Depends()) -> list[Schema_teams_add]:
+    return await TeamDAO.find_all(**request_body.to_dict())   
 
 @router.post("/add/")
 async def register_team(team: Schema_teams_add) -> dict:
