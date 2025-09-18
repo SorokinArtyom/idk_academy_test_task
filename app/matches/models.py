@@ -15,7 +15,8 @@ class match(Base):
     result_first: Mapped[int] = mapped_column(nullable=False)
     result_second: Mapped[int] = mapped_column(nullable=False)
 
-    team: Mapped["team"] = relationship("team", back_populates="matches")
+    first_team: Mapped["team"] = relationship("team", foreign_keys=[first_team_id], back_populates="matches_as_first")
+    second_team: Mapped["team"] = relationship("team", foreign_keys=[second_team_id], back_populates="matches_as_second")
 
     @property
     def result(self) -> tuple[int, int]:
@@ -38,8 +39,32 @@ class team(Base):
     from_country: Mapped[str]
     compound_id: Mapped[int] = mapped_column(ForeignKey("compounds.id"), nullable=False)
 
-    trophies: Mapped[list["trophy"]] = relationship("trophy", back_populates='teams')
-    compound: Mapped["compound"] = relationship("compound", back_populates="teams")
+    # trophies: Mapped[list["trophy"]] = relationship("trophy", back_populates='teams')
+    # compound: Mapped["compound"] = relationship("compound", back_populates="teams")
+
+    matches_as_first: Mapped[list["match"]] = relationship(
+        "match",
+        back_populates="first_team",
+        foreign_keys="[match.first_team_id]"
+    )
+
+    matches_as_second: Mapped[list["match"]] = relationship(
+        "match",
+        back_populates="second_team",
+        foreign_keys="[match.second_team_id]"
+    )
+
+    trophies: Mapped[list["trophy"]] = relationship(
+        "trophy",
+        back_populates="team",
+        # foreign_keys="[trophy.team_id]"
+    )
+
+    compound: Mapped["compound"] = relationship(
+        "compound",
+        back_populates="team",
+        uselist=False
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, name={self.name!r})"
@@ -57,6 +82,22 @@ class compound(Base):
     player_5: Mapped[int] = mapped_column(ForeignKey("players.id"), nullable=False)
     reserve: Mapped[int] = mapped_column(ForeignKey("players.id"), nullable=False)
     trainer: Mapped[int] = mapped_column(ForeignKey("trainers.id"), nullable=False)
+
+    player1: Mapped["player"] = relationship("player", foreign_keys=[player_1], back_populates="compounds_as_player1")
+    player2: Mapped["player"] = relationship("player", foreign_keys=[player_2], back_populates="compounds_as_player2")
+    player3: Mapped["player"] = relationship("player", foreign_keys=[player_3], back_populates="compounds_as_player3")
+    player4: Mapped["player"] = relationship("player", foreign_keys=[player_4], back_populates="compounds_as_player4")
+    player5: Mapped["player"] = relationship("player", foreign_keys=[player_5], back_populates="compounds_as_player5")
+    reserve_player: Mapped["player"] = relationship("player", foreign_keys=[reserve], back_populates="compounds_as_reserve")
+
+    trainer_obj: Mapped["trainer"] = relationship("trainer", foreign_keys=[trainer], back_populates="compounds")
+
+    team:Mapped["team"] = relationship(
+        "team", 
+        primaryjoin="team.compound_id==compound.id", 
+        back_populates="compound",
+        uselist=False
+        )
 
     def __str__(self):
         return(f"{self.__class__.__name__}(id={self.id},"
@@ -78,6 +119,37 @@ class player(Base):
     second_name: Mapped[str]
     contacts: Mapped[str]
 
+    compounds_as_player1: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.player_1",
+        back_populates="player1"
+    )
+    compounds_as_player2: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.player_2",
+        back_populates="player2"
+    )   
+    compounds_as_player3: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.player_3",
+        back_populates="player3"
+    )
+    compounds_as_player4: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.player_4",
+        back_populates="player4"
+    )
+    compounds_as_player5: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.player_5",
+        back_populates="player5"
+    )
+    compounds_as_reserve: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.reserve",
+        back_populates="reserve_player"
+    )
+
 # Создаем модель отношения "тренер"
 # Пока что лень что-то добавлять тренеру уникального...
 class trainer(Base):
@@ -85,6 +157,12 @@ class trainer(Base):
     first_name: Mapped[str]
     second_name: Mapped[str]
     contacts: Mapped[str]
+
+    compounds: Mapped[list["compound"]] = relationship(
+        "compound",
+        foreign_keys="compound.trainer",
+        back_populates="trainer_obj"
+    )
 
 class trophy(Base):
     __tablename__ = 'trophies'
